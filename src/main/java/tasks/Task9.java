@@ -23,9 +23,9 @@ public class Task9 {
     if (persons.isEmpty()) {
       return Collections.emptyList();
     }
-    // не удаляем первый элемент, а используем subList для конвертации, т.к. это более безопасно
-    return persons.subList(1, persons.size())
-        .stream()
+    // не удаляем первый элемент, а пропускаем его с помощью skip
+    return persons.stream()
+        .skip(1)
         .map(Person::firstName)
         .collect(Collectors.toList());
   }
@@ -38,11 +38,7 @@ public class Task9 {
 
   // Тут фронтовая логика, делаем за них работу - склеиваем ФИО
   public String convertPersonToString(Person person) {
-    // добавляем проверку объекта на Null
-    if (person == null) {
-      return "";
-    }
-    // используем String.join, вместо кучи if'ов
+    // используем объединение строк через collectors, вместо кучи if'ов
     // добавляем отчество, вместо двойной фамилии в изначальном варианте
     return Stream.of(person.secondName(), person.firstName(), person.middleName())
         .filter(Objects::nonNull)
@@ -65,24 +61,12 @@ public class Task9 {
 
   // есть ли совпадающие в двух коллекциях персоны?
   public boolean hasSamePersons(Collection<Person> persons1, Collection<Person> persons2) {
-    if (persons1 == null || persons2 == null) {
-      return false;
-    }
-    // используем пересечение множеств
-    Set<Person> set1 = new HashSet<>(persons1);
-    for (Person person : persons2) {
-      if (set1.contains(person)) {
-        return true;
-      }
-    }
-    return false;
+    return persons1 != null && persons2 != null &&
+        persons1.stream().anyMatch(new HashSet<>(persons2)::contains);
   }
 
   // Посчитать число четных чисел
   public long countEven(Stream<Integer> numbers) {
-    if (numbers == null) {
-      return 0;
-    }
     // используем count вместо forEach
     return numbers.filter(num -> num % 2 == 0).count();
   }
@@ -93,11 +77,10 @@ public class Task9 {
     List<Integer> integers = IntStream.rangeClosed(1, 10000).boxed().collect(Collectors.toList());
     List<Integer> snapshot = new ArrayList<>(integers);
     Collections.shuffle(integers);
+    // это происходит из-за особенности вычисления хешей во время преобразования в hashset.
+    // хэш-код вычисляется по модулю емкости hashset, стандартная емкость равна 16, но при конвертации бОльшего списка в hashset, она изменяется так, чтобы кол-во bucket'ов было с запасом
     Set<Integer> set = new HashSet<>(integers);
-    // при преобразовании в строку, Set использует сортированный порядок
+    // когда мы выполняем set.toString() bucket'ы внутри HashSet перебираются по порядку, это и влияет на то, что в итоге элементы выводятся в отсортированном порядке
     assert snapshot.toString().equals(set.toString());
-    // можно проверить сохранение порядка без преобразования в строку
-    assert new HashSet<>(snapshot).equals(set);
-
   }
 }
