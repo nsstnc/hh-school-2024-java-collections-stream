@@ -16,24 +16,25 @@ import java.util.stream.Collectors;
 public class Task6 {
 
 
-  private static List<String> createDescriptions(Person person, Set<Integer> areaIds, Map<Integer, String> areaIdToName) {
-    return areaIds.stream()
-        .map(areaIdToName::get)
-        .filter(Objects::nonNull)
-        .map(regionName -> person.firstName() + " - " + regionName)
-        .toList();
+  private static String getDescription(Person person, Area area) {
+    return person.firstName() + " - " + area.getName();
   }
 
 
   public static Set<String> getPersonDescriptions(Collection<Person> persons,
                                                   Map<Integer, Set<Integer>> personAreaIds,
                                                   Collection<Area> areas) {
-    Map<Integer, String> areaIdToName = areas.stream()
-        .collect(Collectors.toMap(Area::getId, Area::getName));
+    Map<Integer, Area> areaIdToArea = areas.stream()
+        .collect(Collectors.toMap(Area::getId, area -> area));
 
 
     return persons.stream()
-        .flatMap(person -> createDescriptions(person, personAreaIds.getOrDefault(person.id(), Set.of()), areaIdToName).stream())
+        .flatMap(person ->
+            personAreaIds.getOrDefault(person.id(), Set.of()).stream()
+                .map(areaIdToArea::get)
+                .filter(Objects::nonNull)
+                .map(area -> getDescription(person, area))
+        )
         .collect(Collectors.toSet());
   }
 }
