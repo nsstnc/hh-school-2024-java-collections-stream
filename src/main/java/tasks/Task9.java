@@ -19,10 +19,6 @@ public class Task9 {
   // Костыль, эластик всегда выдает в топе "фальшивую персону".
   // Конвертируем начиная со второй
   public List<String> getNames(List<Person> persons) {
-    // проверяем пустоту списка методом isEmpty()
-    if (persons.isEmpty()) {
-      return Collections.emptyList();
-    }
     // не удаляем первый элемент, а пропускаем его с помощью skip
     return persons.stream()
         .skip(1)
@@ -47,9 +43,6 @@ public class Task9 {
 
   // словарь id персоны -> ее имя
   public Map<Integer, String> getPersonNames(Collection<Person> persons) {
-    if (persons == null) {
-      return Collections.emptyMap();
-    }
     // используем более краткую запись через stream и игнорируем дубликаты
     return persons.stream()
         .collect(Collectors.toMap(
